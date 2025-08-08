@@ -53,7 +53,21 @@ export const projectUpdateSchema = z.object({
   statusId: z.number().min(1).max(5).optional()
 })
 
-export const taskSchema = "TODO: Implement task validation schema"
+
+const TaskPrio=z.enum(["low","medium","high"])
+export const taskSchema =  z.object({
+  title: z.string().min(1, 'Name is required').max(100, 'Name too long'),
+  description: z.string().max(500, 'Description too long').optional(),
+  priority: TaskPrio,
+  dueDate: z.date().min(today, 'Due date must today or be in future').optional(),
+})
+
+export const colSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(100, 'Name too long'),
+  description: z.string().max(500, 'Description too long').optional(),
+  color: z.string().max(50, 'Color too long').optional(),
+})
+
 export const userSchema = "TODO: Implement user validation schema"
-export const listSchema = "TODO: Implement list validation schema"
+
 export const commentSchema = "TODO: Implement comment validation schema"

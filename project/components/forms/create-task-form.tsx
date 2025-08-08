@@ -6,10 +6,10 @@ import { Calendar } from "@/components/ui/calendar"
 
 import { useForm } from "react-hook-form"
 
-import { projectCreationSchema } from "@/lib/validations";
+import { taskSchema } from "@/lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod";
-import { CalendarIcon, Plus } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -34,57 +34,55 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useProjects } from "@/hooks/use-projects";
-import { ProjectCreator } from "@/types";
-import { colors } from "@/lib/constants";
-//import { queries } from "@/lib/db";
+import { TaskCreate } from "@/types";
+import { taskPriority } from "@/lib/constants";
+import { useTasks } from "@/hooks/use-tasks";
 
+type CreateTaskFormProps = {
+  colId: number;
+};
 
-
-export function CreateProjectForm(){
+export function CreateTaskForm({colId}:CreateTaskFormProps){
     const {
-      createProject,
-    } = useProjects();
+      createTask,
+    } = useTasks(colId);
 
-    const form = useForm<z.infer<typeof projectCreationSchema>>({
-        resolver: zodResolver(projectCreationSchema),
+    const form = useForm<z.infer<typeof taskSchema>>({
+        resolver: zodResolver(taskSchema),
           defaultValues: {
-          name: "",
+          title: "",
           description: "",
-          color: "",
-          dueDate: new Date(), 
+          priority: "low",
+          dueDate: new Date(),
         }
     })
 
-    async function onSubmit(data: z.infer<typeof projectCreationSchema>) {
-      const newProjData:ProjectCreator={
-        name:data.name,
+    async function onSubmit(data: z.infer<typeof taskSchema>) {
+      const newTaskData:TaskCreate={
+        position:0, //TODO ACCOUNT FOR TASK POSITION
+        columnId:colId,
+        title:data.title,
         description:data.description,
-        color:data.color,
-        dueDate:data.dueDate,
-        statusId:5,
+        due_date:data.dueDate,
+        priority:data.priority,
       }
-      const res=createProject(newProjData)
-      //const response= await queries.projects.getAll()
-      //console.log("User Create response:", response);
-        
+     
+      const res=createTask(newTaskData)
     }
 
     return(
          <Form {...form}>
-            <form id="create-project-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form id={`create-project-form-${colId}`} onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                <FormField
-                control={form.control} name="name"
+                control={form.control} name="title"
                 render={({field})=>(
                   <FormItem className="flex flex-col">
-                    <FormLabel>Project Name</FormLabel>
+                    <FormLabel>Task Title</FormLabel>
                     <FormControl>
-                        <Input placeholder="a-preposterous-lemming" {...field} />
+                        <Input placeholder="a-preposterous-endevour" {...field} />
                        
                     </FormControl>
-                    <FormDescription>
-                        This is your public display name.
-                    </FormDescription>
+    
                     <FormMessage className="text-red-600"/>
                   </FormItem>
                 )}
@@ -93,33 +91,32 @@ export function CreateProjectForm(){
                 control={form.control} name="description"
                 render={({field})=>(
                   <FormItem className="flex flex-col">
-                    <FormLabel >Project Description</FormLabel>
+                    <FormLabel >Task Description</FormLabel>
                     <FormControl>
                         <Textarea placeholder="I want to make something today.." {...field} />
                     </FormControl>
                     <FormDescription>
-                        What's it about?
+                        What's going to happen?
                     </FormDescription>
                     <FormMessage className="text-red-600"/>
                   </FormItem>
                 )}
               /> 
               <FormField
-                control={form.control} name="color"
+                control={form.control} name="priority"
                 render={({field})=>(
                   <FormItem className="flex flex-col">
-                    <FormLabel >Project Color</FormLabel>
+                    <FormLabel >Task Priority</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                         <SelectTrigger>
-                            <SelectValue placeholder="Select a color for your project" />
+                            <SelectValue placeholder="What's this task's priority?" />
                         </SelectTrigger>
                         </FormControl>
                         <SelectContent className="bg-white">
-                            {Object.entries(colors).map(([name, value]) => (
+                            {Object.entries(taskPriority).map(([name, value]) => (
                                 <SelectItem key={value} value={value} className="cursor-pointer" >
                                 <div className="flex flex-row items-center gap-2">
-                                    <div className={`w-3 h-3 rounded-full bg-${value}`} />
                                     {name}
                                 </div>                               
                                 </SelectItem>

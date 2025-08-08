@@ -1,9 +1,11 @@
 'use client'
 import { Project, ProjectCreator } from '../types/index';
+import Link from 'next/link';
 import { Calendar, Users, MoreHorizontal } from "lucide-react"
 import { Button } from './ui/button';
 import { projectStatus } from '@/lib/constants';
 import { UpdateProjectModal } from './modals/update-project-modal';
+import ProjectStatusChip from './project-status-chip';
 
 // TODO: Task 4.5 - Design and implement project cards and layouts
 
@@ -46,7 +48,6 @@ export interface ProjectCardProps {
   onEdit?: (id: string,data:ProjectCreator) => void
   onDelete?: (id: string) => void
 }
-const statusI=["Review","In Progress", "On-hold","Completed","Starting"]
 
 export default function ProjectCard({project,onDelete,onEdit}:ProjectCardProps,) {
   return (
@@ -54,16 +55,17 @@ export default function ProjectCard({project,onDelete,onEdit}:ProjectCardProps,)
           className="bg-white dark:bg-outer_space-500 rounded-lg border border-french_gray-300 dark:border-payne's_gray-400 p-6 hover:shadow-lg transition-shadow cursor-pointer"
     >
       <div className="flex items-start justify-between mb-4">
-        <div className={`w-3 h-3 rounded-full ${project.color}`} />
+        <div className={`w-3 h-3 rounded-full bg-${project.color}`} />
         <button className="p-1 hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 rounded">
           <MoreHorizontal size={16} />
         </button>
       </div>
-
-      <h3 className="text-lg font-semibold text-outer_space-500 dark:text-platinum-500 mb-2">{project.name}</h3>
+      <Link href={`/projects/${project.id}`}>      
+        <h3 className="text-lg font-semibold text-outer_space-500 dark:text-platinum-500 mb-2">{project.name}</h3>
+      </Link>
 
       <p className="text-sm text-payne's_gray-500 dark:text-french_gray-400 mb-4 line-clamp-2">
-        {project.description}
+        {project.description ?? "No description provided."}
       </p>
 
       <div className="flex items-center justify-between text-sm text-payne's_gray-500 dark:text-french_gray-400 mb-4">
@@ -84,26 +86,14 @@ export default function ProjectCard({project,onDelete,onEdit}:ProjectCardProps,)
         </div>
         <div className="w-full bg-french_gray-300 dark:bg-payne's_gray-400 rounded-full h-2">
           <div
-            className={`h-2 rounded-full transition-all duration-300 ${project.color}`}
+            className={`h-2 rounded-full transition-all duration-300 bg-${project.color}`}
             style={{ width: `0%` }}
           />
         </div>
       </div>
 
       <div className="flex flex-row items-center justify-between">
-        <span
-          className={`px-2 py-1 text-xs font-medium rounded-full ${
-              project.statusId === 2
-                ? "bg-blue_munsell-100 text-blue_munsell-700 dark:bg-blue_munsell-900 dark:text-blue_munsell-300"
-                : project.statusId === 1
-                ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300"
-                : project.statusId === 4
-                ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-                : "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
-          }`}
-        >
-          {statusI[project.statusId-1]}
-        </span>
+        <ProjectStatusChip statusId={project.statusId} />
         <div>
           <Button variant="default" onClick={() => onDelete?.(project.id)}>Delete</Button>
           <UpdateProjectModal projectData={project}/>

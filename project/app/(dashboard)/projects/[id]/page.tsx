@@ -1,10 +1,28 @@
+"use client"
 import { ArrowLeft, Settings, Users, Calendar, MoreHorizontal } from "lucide-react"
 import Link from "next/link"
-import { DashboardLayout } from "@/components/dashboard-layout"
+import { useSpecProject } from "@/hooks/use-projects"
 
-export default function ProjectPage({ params }: { params: { id: string } }) {
+import { use } from 'react'
+import ProjectStatusChip from "@/components/project-status-chip"
+import { Button } from '@/components/ui/button';
+import { KanbanBoard } from "@/components/ui/kaban_ui/kanban-board"
+import { useColumns } from "@/hooks/use-columns"
+import { ColumnCreate } from "@/types"
+import { CreateColumnModal } from "@/components/modals/create-col-modal"
+
+export default function ProjectPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params); 
+  const { project, isLoading, error } = useSpecProject(id);
+  const {createCol}=useColumns(id)
+  if (isLoading) return <p>Loading...</p>;
+  if (error) return <p>Failed to load projects {error.message}</p>;
+  if (!project) return <p>Failed to load projects</p>;
+
+
+
+  
   return (
-    <DashboardLayout>
       <div className="space-y-6">
         {/* Project Header */}
         <div className="flex items-center justify-between">
@@ -16,14 +34,22 @@ export default function ProjectPage({ params }: { params: { id: string } }) {
               <ArrowLeft size={20} />
             </Link>
             <div>
-              <h1 className="text-3xl font-bold text-outer_space-500 dark:text-platinum-500">Project #{params.id}</h1>
+              <h1 className="text-3xl font-bold text-outer_space-500 dark:text-platinum-500">Project: {project?.name}</h1>
               <p className="text-payne's_gray-500 dark:text-french_gray-500 mt-1">
-                Kanban board view for project management
+                {project?.description}
+              </p>
+              <p className="text-payne's_gray-500 dark:text-french_gray-500 mt-1">
+                Due Date: {project?.due_date ? project.due_date.toLocaleDateString() : "No due date set"}
+              </p>
+              <p className="text-payne's_gray-500 dark:text-french_gray-500 mt-1">
+                Created On: {project?.created_at.toLocaleDateString()}  Last Updated: {project?.updated_at.toLocaleDateString()}
               </p>
             </div>
+
           </div>
 
           <div className="flex items-center space-x-2">
+            <ProjectStatusChip statusId={project?.statusId||5} />
             <button className="p-2 hover:bg-platinum-500 dark:hover:bg-payne's_gray-400 rounded-lg transition-colors">
               <Users size={20} />
             </button>
@@ -51,11 +77,11 @@ export default function ProjectPage({ params }: { params: { id: string } }) {
             <li>• Task 5.6: Create task detail modals and editing interfaces</li>
           </ul>
         </div>
+        <CreateColumnModal projectId={id}/>
 
         {/* Kanban Board Placeholder */}
-        <div className="bg-white dark:bg-outer_space-500 rounded-lg border border-french_gray-300 dark:border-payne's_gray-400 p-6">
-          <div className="flex space-x-6 overflow-x-auto pb-4">
-            {["To Do", "In Progress", "Review", "Done"].map((columnTitle, columnIndex) => (
+        <KanbanBoard projectId={project?.id}/>
+                    {/*{["To Do", "In Progress", "Review", "Done"].map((columnTitle, columnIndex) => (
               <div key={columnTitle} className="flex-shrink-0 w-80">
                 <div className="bg-platinum-800 dark:bg-outer_space-400 rounded-lg border border-french_gray-300 dark:border-payne's_gray-400">
                   <div className="p-4 border-b border-french_gray-300 dark:border-payne's_gray-400">
@@ -101,11 +127,9 @@ export default function ProjectPage({ params }: { params: { id: string } }) {
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
+            ))}*/}
 
-        {/* Component Implementation Guide */}
+        {/* Component Implementation Guide 
         <div className="mt-8 p-6 bg-gray-50 dark:bg-gray-800/50 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
           <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-4">
             🛠️ Components & Features to Implement
@@ -130,8 +154,7 @@ export default function ProjectPage({ params }: { params: { id: string } }) {
               </ul>
             </div>
           </div>
-        </div>
+        </div>*/}
       </div>
-    </DashboardLayout>
   )
 }

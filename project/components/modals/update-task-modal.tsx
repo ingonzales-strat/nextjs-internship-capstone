@@ -37,46 +37,39 @@ Integration:
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { useTasks } from "@/hooks/use-tasks";
-import { CreateTaskForm } from "../forms/create-task-form";
+import { Task } from "@/types";
+import { UpdateTaskForm } from "../forms/update-task-form";
 
-type CreateTaskModalpProps = {
-  colId: number;
+type UpdateTaskModalpProps = {
+  task: Task;
 };
 
 
-export  function CreateTaskModal({ colId }: CreateTaskModalpProps) {
+export  function UpdateTaskModal({ task }: UpdateTaskModalpProps) {
     const {
 
       isCreating
 
-    } = useTasks(colId);
+    } = useTasks(task.id);
   
   return (
-    <Dialog>
-        <DialogTrigger className="w-full p-3 border-2 border-dashed border-french_gray-300 dark:border-payne's_gray-400 rounded-lg text-payne's_gray-500 dark:text-french_gray-400 hover:border-blue_munsell-500 hover:text-blue_munsell-500 transition-colors">
-          + Add Task
-        </DialogTrigger>
-        <DialogContent className="bg-white">
+      <DialogContent className="bg-white">
         <DialogHeader>
-          <DialogTitle className="font-bold text-outer_space-500 dark:text-platinum-500">New Task</DialogTitle>
+          <DialogTitle className="font-bold text-outer_space-500 dark:text-platinum-500">Edit Task</DialogTitle>
         </DialogHeader>
-        <CreateTaskForm colId={colId}/>
+        <UpdateTaskForm task={task}/>
         
         <DialogFooter className="flex flex-col gap-3 sm:flex-row">
           <DialogClose asChild>
             <Button variant="outline">Cancel</Button>
           </DialogClose>
           <DialogClose asChild>
-            <Button disabled={isCreating} className="bg-blue_munsell-500 hover:bg-blue_munsell-300 text-white" type="submit" variant="outline"form={`create-project-form-${colId}`}>
-              {isCreating ? "Creating..." : "Add Task"}
+            <Button disabled={isCreating} className="bg-blue_munsell-500 hover:bg-blue_munsell-300 text-white" type="submit" variant="outline"form={`update-task-form-${task.id}`}>
+              {isCreating ? "Saving..." : "Save"}
             </Button>
           </DialogClose>
         </DialogFooter>
         
       </DialogContent>
-     
-            
-    </Dialog>
-    
   )
 }

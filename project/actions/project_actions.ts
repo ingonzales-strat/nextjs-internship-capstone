@@ -4,6 +4,7 @@ import 'dotenv/config';
 import { queries } from '../lib/db/index';
 import { auth } from '@clerk/nextjs/server';
 import { Project, ProjectCreator } from '@/types';
+import { clerkAuthCheck } from '@/lib/server_util';
 
 
 export const getProjects = async () => {
@@ -147,13 +148,4 @@ export const updateProject=async (
     
   }
 
-}
-
-export async function clerkAuthCheck(){
-  const clerkID = (await auth()).userId;
-
-  if (!clerkID) {
-    throw new Error("User not Authenticated.");
-  }
-  return clerkID
 }

@@ -41,9 +41,10 @@ export const queries = {
 import {config} from "dotenv";
 import { drizzle } from 'drizzle-orm/neon-http';
 import * as schema from '@/lib/db/schema';
-import { ProjectCreator } from "@/types";
-import { projectMembers, projectTable } from "@/lib/db/schema";
+import { ColumnCreate, ProjectCreator, TaskCreate } from "@/types";
+import { columnTable, projectMembers, projectTable, taskTable } from "@/lib/db/schema";
 import { eq, sql } from "drizzle-orm";
+import { create } from "domain";
 
 config({path:".env"});
 export const db = drizzle(process.env.DATABASE_URL!,{schema});
@@ -116,26 +117,55 @@ export const queries = {
         }).where(eq(projectTable.id,id));
     },
     delete: async (id: string) => {
-      const res =await  db.delete(projectTable).where(eq(projectTable.id,id)).returning({ deletedId: projectTable.id});; 
+      const res =await  db.delete(projectTable).where(eq(projectTable.id,id)).returning({ deletedId: projectTable.id});
       return res
     },
   },
   tasks: {
-    getByProject: (projectId: string) => {
-      console.log(`TODO: Task 4.4 - Get tasks for project ${projectId}`)
-      return []
+
+    getByCol: async(colId:number)=>{
+      return db.select().from(taskTable).where(eq(taskTable.columnId,colId))
     },
-    create: (data: any) => {
-      console.log("TODO: Create task", data)
-      return null
+    create: async (data: TaskCreate) => {
+      return db.insert(taskTable).values(data).returning()
     },
-    update: (id: string, data: any) => {
-      console.log(`TODO: Update task ${id}`, data)
-      return null
+    update: (id: number, data: TaskCreate) => {
+      return db.update(taskTable)
+        .set({
+          title:data.title,
+          description:data.description,
+          priority:data.priority,
+          position:data.position,
+          due_date:data.due_date,
+          updated_at:sql`now()`
+        }).where(eq(taskTable.id,id));
     },
-    delete: (id: string) => {
-      console.log(`TODO: Delete task ${id}`)
-      return null
+    delete: (id: number) => {
+      return db.delete(taskTable).where(eq(taskTable.id,id)).returning({ deletedId: taskTable.id});;  
     },
   },
+  cols:{
+    getByProject: async(projectId: string) => {
+      return db.select().from(columnTable).where(eq(columnTable.projectId,projectId))
+    },
+    create: async(colData: ColumnCreate)=>{
+      const newProject=await db.insert(columnTable).values(colData).returning()
+      return newProject 
+    },
+    update: (colId: number,  colData: ColumnCreate) => {
+      return db.update(columnTable)
+        .set({
+          name:colData.name,
+          description:colData.description,
+          position:colData.position,
+          color:colData.color,
+          updated_at:sql`now()`
+        }).where(eq(columnTable.id,colId));
+    },
+    delete: async (colId: number) => {
+      const res =await  db.delete(columnTable).where(eq(columnTable.id,colId)).returning({ deletedId: projectTable.id});
+      return res
+    },
+
+  }
 }
