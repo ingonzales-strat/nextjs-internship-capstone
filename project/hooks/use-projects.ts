@@ -151,3 +151,23 @@ export function useProjects() {
   }
 }
 
+export function useSpecProject(projectId:string){
+  const {
+    data: project,
+    isLoading,
+    error
+  } = useQuery({
+    queryKey: ['projects',projectId],
+    queryFn: async () => {
+      const res = await getProjectsById(projectId);
+      if (!res.success) throw new Error(res.error);
+      return res.data;
+    },
+  })
+
+  return {
+    project,
+    isLoading,
+    error,
+  }
+}

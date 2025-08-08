@@ -13,3 +13,5 @@ export const projectStatus: Record<string, number> = {
   'Completed':4,
   'Starting':5,
 };
+
+export const statusArray=["Review","In Progress", "On-hold","Completed","Starting"]
