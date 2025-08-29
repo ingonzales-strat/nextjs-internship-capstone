@@ -36,23 +36,31 @@ Integration:
 "use client"
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { Button } from "../ui/button";
-import { useTasks } from "@/hooks/use-tasks";
+import { useProjectTasks } from "@/hooks/use-tasks";
 import { CreateTaskForm } from "../forms/create-task-form";
+import { useState } from "react";
 
 type CreateTaskModalpProps = {
+  projectId:string
   colId: number;
+  setLocked: React.Dispatch<React.SetStateAction<boolean>>
+
 };
 
 
-export  function CreateTaskModal({ colId }: CreateTaskModalpProps) {
+export  function CreateTaskModal({ colId,projectId,setLocked }: CreateTaskModalpProps) {
+  const [isOpen,setIsOpen] = useState(false)
     const {
-
+    
       isCreating
 
-    } = useTasks(colId);
+    } = useProjectTasks(projectId);
   
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+        setIsOpen(open);   // controls modal visibility
+        setLocked(open);   // lock/unlock while modal is open
+      }}>
         <DialogTrigger className="w-full p-3 border-2 border-dashed border-french_gray-300 dark:border-payne's_gray-400 rounded-lg text-payne's_gray-500 dark:text-french_gray-400 hover:border-blue_munsell-500 hover:text-blue_munsell-500 transition-colors">
           + Add Task
         </DialogTrigger>
@@ -60,17 +68,17 @@ export  function CreateTaskModal({ colId }: CreateTaskModalpProps) {
         <DialogHeader>
           <DialogTitle className="font-bold text-outer_space-500 dark:text-platinum-500">New Task</DialogTitle>
         </DialogHeader>
-        <CreateTaskForm colId={colId}/>
+        <CreateTaskForm colId={colId} projectId={projectId} setOpen={setIsOpen} setLocked={setLocked}/>
         
         <DialogFooter className="flex flex-col gap-3 sm:flex-row">
           <DialogClose asChild>
             <Button variant="outline">Cancel</Button>
           </DialogClose>
-          <DialogClose asChild>
-            <Button disabled={isCreating} className="bg-blue_munsell-500 hover:bg-blue_munsell-300 text-white" type="submit" variant="outline"form={`create-project-form-${colId}`}>
-              {isCreating ? "Creating..." : "Add Task"}
-            </Button>
-          </DialogClose>
+          
+          <Button disabled={isCreating} className="bg-blue_munsell-500 hover:bg-blue_munsell-300 text-white" type="submit" variant="outline"form={`create-project-form-${colId}`}>
+            {isCreating ? "Creating..." : "Add Task"}
+          </Button>
+       
         </DialogFooter>
         
       </DialogContent>

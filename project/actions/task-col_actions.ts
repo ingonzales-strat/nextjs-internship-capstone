@@ -62,23 +62,12 @@ export const updateCol=async(coldId:number,coldData:ColumnCreate)=>{
 //Task Actions
 
 export const createTask=async(taskData:TaskCreate)=>{
-  try {
-      clerkAuthCheck()
-      console.log("new task",taskData)
+  clerkAuthCheck()
+  const newTask=await queries.tasks.create(taskData)
 
-      const newTask=await queries.tasks.create(taskData)
+  if (!newTask[0]) throw new Error("Task insert failed or already exists");
 
-      return {success: true,data: newTask}
-    
-  } catch (error) {
-
-    console.error("❌ Error creating new task:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
-    
-  }
+  return newTask[0]
 }
 
 
@@ -124,44 +113,24 @@ export const getTasks=async(colId:number)=>{
 }
 
 export const updateTask=async(taskId:number,taskUpdateData:TaskCreate)=>{
-  try {
-    clerkAuthCheck()
+  clerkAuthCheck()
+  const updatedTask=await queries.tasks.update(taskId,taskUpdateData).returning()
 
-    const updatedTask = await queries.tasks.update(taskId,taskUpdateData).returning()
+  if (!updatedTask[0]) throw new Error("Task update failed or already exists");
 
-    if (!updatedTask) {
-      throw new Error("Task could not be updated or was not found.");
-    }
-
-    return { success: true, data:updatedTask }
-    
-  } catch (error) {
-    console.error("❌ Error updating column =>", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
-  }
+  return updatedTask[0]
 }
 
 
 export const deleteTask=async(taskId:number)=>{
-  try {
-      clerkAuthCheck()
+  clerkAuthCheck()
+  const deletedTaskId= await queries.tasks.delete(taskId)
 
-      const del = await queries.tasks.delete(taskId)
+  if (!deletedTaskId[0]) throw new Error("Task deletion failed or already exists");
 
-      return {success: true,data: del}
-    
-  } catch (error) {
+  return deletedTaskId[0]
+  
 
-    console.error(`❌ Error deleting task ${taskId}`, error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Unknown error",
-    };
-    
-  }
 }
 
 export const closeTask=async(taskId:number)=>{

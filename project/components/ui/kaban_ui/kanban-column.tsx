@@ -1,7 +1,7 @@
 import { CreateTaskModal } from "@/components/modals/create-task-modal";
 import { TaskCard } from "@/components/tasks/task-card";
-import { useTasks } from "@/hooks/use-tasks";
-import { Column, ColumnCreate, Task, TaskCreate } from "@/types";
+import { useProjectTasks } from "@/hooks/use-tasks";
+import { Column, Task, TaskCreate } from "@/types";
 import {  MoreHorizontal,ArrowRight, ArrowLeft, Trash, Pencil } from 'lucide-react';
 import { ScrollArea } from "@/components/ui/scroll-area"
 import {
@@ -11,7 +11,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useColumns } from "@/hooks/use-columns";
@@ -35,10 +34,13 @@ export interface KanbanColumnProps {
 }
 
 export default function KanbanColumn({id,colArrayLength,column,taskArray,colLocalPosition ,leftHandler, rightHandler}:KanbanColumnProps){
-    const{updateTask}=useTasks(column.id)
+
+    const {updateTask,  deleteTask } = useProjectTasks(column.projectId);
+    
     const{deleteCol}=useColumns(column.projectId)
     const [dragTasks, setDragTasks] = useState<Task[]>([]);
     const[openDiag,setOpenDiag] = useState(false)
+    const[locked,setLocked] = useState(false)
 
     useEffect(() => {
 
@@ -68,10 +70,11 @@ export default function KanbanColumn({id,colArrayLength,column,taskArray,colLoca
     const {attributes, listeners, setNodeRef, transform, transition} =useSortable(
     {id:id,
     data: {
-    type: "column",
-    column,
-   }
-  })
+      type: "column",
+      column,
+    },
+    disabled:locked
+    })
     const style = {
       transition,
       transform: CSS.Transform.toString(transform),
@@ -99,7 +102,7 @@ export default function KanbanColumn({id,colArrayLength,column,taskArray,colLoca
             columnId:id
           };
        
-          updateTask(task.id, taskData);
+          updateTask(task.id, taskData,"order");
         });
   
     }
@@ -114,6 +117,11 @@ export default function KanbanColumn({id,colArrayLength,column,taskArray,colLoca
         return newArr;
       });
       } 
+    }
+    function setOpenHandler (open:boolean){
+        setOpenDiag(open);   // controls modal visibility
+        setLocked(open);   // lock/unlock while modal is open
+
     }
 
     function toTopButton(taskId:number){
@@ -150,7 +158,7 @@ export default function KanbanColumn({id,colArrayLength,column,taskArray,colLoca
                     {dragTasks.length}
                   </div>
                 </div>
-                <Dialog open={openDiag} onOpenChange={setOpenDiag}>
+                <Dialog open={openDiag} onOpenChange={setOpenHandler }>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button className="p-1 rounded hover:bg-muted">
@@ -163,11 +171,9 @@ export default function KanbanColumn({id,colArrayLength,column,taskArray,colLoca
                       <DropdownMenuGroup>
 
                         <DropdownMenuItem  onSelect={(e) => e.preventDefault()} className="cursor-pointer  hover:bg-muted">
-                        <DialogTrigger className=" flex flex-row items-center gap-2">
-                          <Pencil size={16}/> Edit Column
-
+                        <DialogTrigger   className="flex flex-row items-center gap-2">
+                            <Pencil size={16} /> Edit Column
                         </DialogTrigger>
-                        
                         </DropdownMenuItem>
                         <DropdownMenuItem
                         onClick={delColHandler}
@@ -193,7 +199,7 @@ export default function KanbanColumn({id,colArrayLength,column,taskArray,colLoca
                     
                     </DropdownMenuContent>
                   </DropdownMenu>
-                  <UpdateColumnModal column={column} setOpen={setOpenDiag}/>
+                  <UpdateColumnModal column={column} setOpen={setOpenDiag} setLocked={setLocked}/>
                 </Dialog>
                 
               </div>
@@ -205,11 +211,11 @@ export default function KanbanColumn({id,colArrayLength,column,taskArray,colLoca
               <ScrollArea className="h-72">
                 <SortableContext items={dragTasks} strategy={verticalListSortingStrategy}>
                   {dragTasks.map((task) => (
-                    <TaskCard key={task.id} id={task.id} task={task} arrayPosition={getTaskPos(task.id)} taskArrayLength={dragTasks.length} topHandler={()=>toTopButton(task.id)} bottomHandler={()=>toBottomButton(task.id)}/>
+                    <TaskCard key={task.id} projectId={column.projectId} id={task.id} task={task} delTaskHandler={()=>deleteTask(task.id)}arrayPosition={getTaskPos(task.id)} taskArrayLength={dragTasks.length} topHandler={()=>toTopButton(task.id)} bottomHandler={()=>toBottomButton(task.id)}/>
                   ))}
                 </SortableContext>
               </ScrollArea>
-              <CreateTaskModal colId={column.id}/>
+              <CreateTaskModal colId={column.id} projectId={column.projectId} setLocked={setLocked}/>
             </div>
           </div>
         </div>

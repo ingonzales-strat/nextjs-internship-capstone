@@ -4,13 +4,13 @@ import { use } from 'react'
 import { KanbanBoard } from "@/components/ui/kaban_ui/kanban-board"
 import { CreateColumnModal } from "@/components/modals/create-col-modal"
 import { ProjectHeader } from "@/components/project/project-header"
-import { SheetProvider } from "@/components/task-sheet-context"
+import { SheetProvider } from "@/components/tasks/task-sheet-context"
 import TaskSheetRoot from "@/components/tasks/task-content-view"
 
-import { Button } from "@/components/ui/button"
-import { toast, Toaster } from "sonner"
 
 import { useProjectTasks } from "@/hooks/use-tasks"
+import { UpdateTaskModalProvider } from "@/components/tasks/task-update-modal-context"
+import { UpdateTaskModal } from "@/components/modals/update-task-modal"
 
 
 export default function ProjectPage({ params }: { params: Promise<{ id: string }> }) {
@@ -27,6 +27,7 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
   
   return (
     <SheetProvider>
+      <UpdateTaskModalProvider>
         <div className="space-y-6">
           {/* Project Header */}
 
@@ -35,7 +36,9 @@ export default function ProjectPage({ params }: { params: Promise<{ id: string }
           <CreateColumnModal projectId={id}/>
           <KanbanBoard projectId={project?.id} projectTasks={projectTasks}/>
           <TaskSheetRoot isClosing={isClosing} isOpening={isOpening} openTask={openTask} closeTask={closeTask}/>
-      </div>
+          <UpdateTaskModal  projectId={id}/>
+        </div>
+      </UpdateTaskModalProvider>
     </SheetProvider>
       
   )

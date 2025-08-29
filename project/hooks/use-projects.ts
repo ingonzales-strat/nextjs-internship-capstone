@@ -39,7 +39,6 @@ export function useProjects() {
       queryClient.invalidateQueries({ queryKey: ['projects'] })
     },
     onError: (err) => {
-      // React Query passes the thrown error here
       toast.error("Failed to create project", { description: err.message });
       console.error("Project creation failed:", err);
     },

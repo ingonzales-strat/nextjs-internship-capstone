@@ -16,12 +16,13 @@ import {
 
 import { UpdateTaskModal } from "../modals/update-task-modal"
 import { Dialog, DialogTrigger } from "../ui/dialog"
-import { useTasks } from "@/hooks/use-tasks"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities";
 
 import { TaskPriorityBadge, TaskStatusBadge } from "../ui/status_badges"
-import { useTaskSheet } from "../task-sheet-context"
+import { useTaskSheet } from "./task-sheet-context"
+import { useState } from "react"
+import { useUpdateTaskModal } from "./task-update-modal-context"
 
 
 /*
@@ -66,28 +67,19 @@ interface TaskCardProps {
   isDragging?: boolean
   arrayPosition?:number
   taskArrayLength?:number
+  projectId:string
   topHandler?: () => void;
   bottomHandler?: () => void;
+  delTaskHandler?: () => void;
 }
 
 
-export function TaskCard( {id,task,arrayPosition, isDragging,taskArrayLength,topHandler,bottomHandler }: TaskCardProps) {
-
+export function TaskCard( {id,task,arrayPosition, projectId,isDragging,taskArrayLength, delTaskHandler , topHandler,bottomHandler }: TaskCardProps) {
+  const { setTaskToEdit } = useUpdateTaskModal();
+  
   const { setActiveTask } = useTaskSheet();
-
-  const{deleteTask,isDeleting,deleteError}=useTasks(task.columnId)
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "high":
-        return "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
-      case "medium":
-        return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300"
-      case "low":
-        return "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
-      default:
-        return "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300"
-    }
-  }
+  const [isOpen,setIsOpen] = useState(false)
+ 
   const disableCheckTop =
     arrayPosition == null ? true : arrayPosition === 0;
 
@@ -108,8 +100,8 @@ export function TaskCard( {id,task,arrayPosition, isDragging,taskArrayLength,top
   };
 
 
-  const delTaskHandler = async () => { 
-    deleteTask(task.id)
+  const editTaskHandler = async () => { 
+    setTaskToEdit(task)
   }
   return (
     <div
@@ -124,16 +116,16 @@ export function TaskCard( {id,task,arrayPosition, isDragging,taskArrayLength,top
             </h4>
           </div>
           
-          <Dialog>
+          
             <DropdownMenu>
               <DropdownMenuTrigger disabled={isDragging}><MoreHorizontal size={16} /></DropdownMenuTrigger>
               <DropdownMenuContent className="bg-white">
                 <DropdownMenuLabel>Task</DropdownMenuLabel>
                   <DropdownMenuGroup>
-                    <DropdownMenuItem  className="cursor-pointer hover:bg-muted">
-                      <DialogTrigger className=" flex flex-row items-center gap-2">
-                        <Pencil size={16}/> Edit Task
-                      </DialogTrigger>
+                    <DropdownMenuItem 
+                     onClick={editTaskHandler}
+                     className="cursor-pointer hover:bg-muted flex flex-row items-center gap-2">
+                      <Pencil size={16}/> Edit Task
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={delTaskHandler}
@@ -159,8 +151,7 @@ export function TaskCard( {id,task,arrayPosition, isDragging,taskArrayLength,top
                 
               </DropdownMenuContent>
             </DropdownMenu>
-            <UpdateTaskModal task={task}/>
-          </Dialog>
+            
         </div>
       
 

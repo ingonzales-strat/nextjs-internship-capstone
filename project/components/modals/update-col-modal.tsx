@@ -9,9 +9,11 @@ import { useState } from "react";
 type UpdateColumnModalpProps = {
   column:Column
   setOpen: React.Dispatch<React.SetStateAction<boolean>>
+  setLocked: React.Dispatch<React.SetStateAction<boolean>>
+
 };
 
-export  function UpdateColumnModal({column,setOpen}:UpdateColumnModalpProps) {
+export  function UpdateColumnModal({column,setOpen,setLocked}:UpdateColumnModalpProps) {
     
     const {
 
@@ -25,7 +27,7 @@ export  function UpdateColumnModal({column,setOpen}:UpdateColumnModalpProps) {
           <DialogTitle className="font-bold text-outer_space-500 dark:text-platinum-500">Edit Column</DialogTitle>
 
         </DialogHeader>
-        <UpdateColumnForm column={column} setOpen={setOpen}/>
+        <UpdateColumnForm column={column} setOpen={setOpen} setLocked={setLocked}/>
         
         <DialogFooter className="flex flex-col gap-3 sm:flex-row">
           <DialogClose asChild>

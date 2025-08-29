@@ -152,8 +152,7 @@ export function KanbanBoard({ projectId,projectTasks }: taskCommentCardProps) {
       const taskData:TaskCreate = {
         ...task, 
       };
-      console.log("Updates task",index,taskData)
-      updateTask(task.id, taskData);
+      updateTask(task.id, taskData,"order");
   });
     
 }
@@ -369,41 +368,8 @@ export function KanbanBoard({ projectId,projectTasks }: taskCommentCardProps) {
 
         taskUpdateHandler(filteredOriginTaskList)
         taskUpdateHandler(refactoredTargetTaskArray)
-        /*filteredOriginTaskList.forEach((task,index)=>{
-          task.position=index;
-        })
-
-        console.log("Origin Array",filteredOriginTaskList)
-
-
-
-        // New Column
-        const filteredNewTaskList=rawTasksRef.current.filter(t=>t.columnId===actTask.columnId)
-        const origPos=getTaskPos(active.id,filteredNewTaskList)
-        const newPos=getTaskPos(over.id,filteredNewTaskList)
-        
-        const refactoredNewTaskArray = arrayMove(filteredNewTaskList, origPos, newPos);
-        refactoredNewTaskArray.forEach((task,index)=>{
-          task.position=index;
-        })
-
-        console.log("from",origPos,"to",newPos)
-        console.log("Origin Array",filteredOriginTaskList)
-        console.log("Target Array",refactoredNewTaskArray)*/
 
       }
-
-
-
-  
-
-     /* setTasks((prev) =>
-          prev.map((t) =>
-            t.id === active.id ? { ...t,  position: newPos } : t
-          )
-      );*/
-
-
       //taskOrderUpdate(originColumn.current,actTask.columnId)
       activeTaskRef.current = null;
       setActiveTask(null) 
@@ -438,7 +404,7 @@ export function KanbanBoard({ projectId,projectTasks }: taskCommentCardProps) {
         {activeTask ? (
           <div className="opacity-80 ">
             <p>Col:{activeTask.columnId} Pos:{activeTask.position}</p>
-            <TaskCard id={activeTask.id} task={activeTask} isDragging={true}/>
+            <TaskCard id={activeTask.id} projectId={projectId} task={activeTask} isDragging={true}/>
           </div>
         ) : null}
       </DragOverlay>

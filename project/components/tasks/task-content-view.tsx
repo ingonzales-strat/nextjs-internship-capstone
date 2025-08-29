@@ -2,13 +2,10 @@
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet"
 import { Separator } from "@/components/ui/separator"
-import { Task } from "@/types"
 import { TaskPriorityBadge, TaskStatusBadge } from "../ui/status_badges"
 
 import { useUser } from "@clerk/nextjs"
@@ -16,7 +13,7 @@ import { CreateCommentForm } from "../forms/comment-form"
 import { ScrollArea } from "../ui/scroll-area"
 import { useTaskComments } from "@/hooks/use-comments"
 import TaskCommentCard from './task-comment-card';
-import { useTaskSheet } from "../task-sheet-context"
+import { useTaskSheet } from "./task-sheet-context"
 import { Button } from "../ui/button"
 import { CircleCheckBig, Loader2Icon, RefreshCcwDot } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar"

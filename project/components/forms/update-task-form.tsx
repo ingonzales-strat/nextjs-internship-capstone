@@ -36,16 +36,20 @@ import {
 } from "@/components/ui/select"
 import { Task, TaskCreate } from "@/types";
 import { taskPriority } from "@/lib/constants";
-import { useTasks } from "@/hooks/use-tasks";
+import { useProjectTasks } from "@/hooks/use-tasks";
+import { useUpdateTaskModal } from "../tasks/task-update-modal-context";
 
 type UpdateTaskFormProps = {
   task: Task;
+  projectId:string,
+
+
+
 };
 
-export function UpdateTaskForm({task}:UpdateTaskFormProps){
-    const {
-      updateTask,
-    } = useTasks(task.columnId);
+export function UpdateTaskForm({task,projectId}:UpdateTaskFormProps){
+    const {  setTaskToEdit } = useUpdateTaskModal();
+    const {updateTask}=useProjectTasks(projectId)
 
     const form = useForm<z.infer<typeof taskSchema>>({
         resolver: zodResolver(taskSchema),
@@ -58,17 +62,24 @@ export function UpdateTaskForm({task}:UpdateTaskFormProps){
     })
 
     async function onSubmit(data: z.infer<typeof taskSchema>) {
-      const newTaskData:TaskCreate={
-        assigneeId:null,
-        position:task.position,
-        columnId:task.columnId,
-        title:data.title,
-        description:data.description||'',
-        due_date:data.dueDate || null,
-        priority:data.priority,
-      }
+      console.log("Submit Pressed",data)
+      try{
+        const newTaskData:TaskCreate={
+          assigneeId:null,
+          position:task.position,
+          columnId:task.columnId,
+          title:data.title,
+          description:data.description||'',
+          due_date:data.dueDate || null,
+          priority:data.priority,
+        }
 
-      const res=updateTask(task.id,newTaskData)
+        await updateTask(task.id,newTaskData,"form")
+        setTaskToEdit(null)
+
+      }catch (err){
+        console.error("Failed to update task", err);
+      }
     }
 
     return(

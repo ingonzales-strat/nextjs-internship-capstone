@@ -36,22 +36,26 @@ import {
 } from "@/components/ui/select"
 import { TaskCreate } from "@/types";
 import { taskPriority } from "@/lib/constants";
-import { useTasks } from "@/hooks/use-tasks";
+import { useProjectTasks } from "@/hooks/use-tasks";
 
 type CreateTaskFormProps = {
   colId: number;
+  projectId:string,
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>
+  setLocked: React.Dispatch<React.SetStateAction<boolean>>
+
 };
 
-export function CreateTaskForm({colId}:CreateTaskFormProps){
-    const {tasks,
+export function CreateTaskForm({colId,projectId, setOpen, setLocked}:CreateTaskFormProps){
+    const {projectTasks,
       createTask,
-    } = useTasks(colId);
+    } = useProjectTasks(projectId);
 
     var nextPosition=0;
-    if (!tasks) {
+    if (!projectTasks) {
       nextPosition=0
     }else{
-      nextPosition=tasks.length
+      nextPosition=projectTasks.length
     }
     
 
@@ -66,17 +70,25 @@ export function CreateTaskForm({colId}:CreateTaskFormProps){
     })
 
     async function onSubmit(data: z.infer<typeof taskSchema>) {
-      const newTaskData:TaskCreate={
-        assigneeId:null,
-        position:nextPosition,
-        columnId:colId,
-        title:data.title,
-        description:data.description||'',
-        due_date:data.dueDate || null ,
-        priority:data.priority,
+      try{
+          const newTaskData:TaskCreate={
+          assigneeId:null,
+          position:nextPosition,
+          columnId:colId,
+          title:data.title,
+          description:data.description||'',
+          due_date:data.dueDate || null ,
+          priority:data.priority,
+        }
+      
+        await createTask(newTaskData)
+        setOpen(false)
+        setLocked(false)
+
+      }catch (err){
+        console.error("Failed to create task", err);
       }
-     
-      const res=createTask(newTaskData)
+      
     }
 
     return(
